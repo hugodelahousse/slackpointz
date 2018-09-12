@@ -2,3 +2,4 @@ django
 django-environ
 slackclient
 gunicorn
+django-heroku
