@@ -17,6 +17,7 @@ import environ
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
 env = environ.Env()
+environ.Env.read_env()
 
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/2.1/howto/deployment/checklist/
@@ -27,7 +28,8 @@ SECRET_KEY = '&!7nwin2^8)+6ps*7xs@%^aang8&2bt9v8k$wknw*-h=im2w+-'
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = env('DJANGO_DEBUG', default=False)
 
-ALLOWED_HOSTS = ['slackpointz.herokuapp.com']
+if not DEBUG:
+    ALLOWED_HOSTS = ['slackpointz.herokuapp.com']
 
 
 # Application definition
