@@ -1,8 +1,7 @@
 import logging
 import random
 import re
-from django.shortcuts import render
-from django.http import HttpResponse
+from django.http import HttpResponse, JsonResponse
 from django.views.decorators.http import require_POST
 from .models import SlackUser
 
@@ -10,6 +9,14 @@ logger = logging.getLogger('django')
 NO_TEXT = ['Gimme some info dawg !']
 
 slash_pattern = re.compile(r'(?P<user><@(?P<user_id>U[A-Z0-9]+)\|(?P<username>\S+)>)( (?P<score_delta>[+-]?\d+))?')
+
+
+def slack_response(text, response_type="in_channel"):
+    return JsonResponse({
+        'response_type': response_type,
+        'text': text
+    })
+
 
 @require_POST
 def slash_pointz(request):
@@ -35,6 +42,6 @@ def slash_pointz(request):
 
     if score_delta:
         user.increase_score(score_delta)
-        return HttpResponse(f'@{username}\'s score is now: {user.score}')
+        return slack_response(f'@{username}\'s score is now: {user.score}')
     elif result.group('user_id'):
-        return HttpResponse(f'@{username} has {user.score} points !')
+        return slack_response(f'@{username} has {user.score} points !')
