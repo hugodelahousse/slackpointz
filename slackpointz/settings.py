@@ -122,6 +122,23 @@ USE_TZ = True
 
 STATIC_URL = '/static/'
 
+LOGGING = {
+    'version': 1,
+    'disable_existing_loggers': False,
+    'handlers': {
+        'console': {
+            'class': 'logging.StreamHandler',
+        },
+    },
+    'loggers': {
+        'django': {
+            'handlers': ['console'],
+            'level': env('DJANGO_LOG_LEVEL', default='ERROR'),
+        },
+    },
+}
+
+
 SLACK_APP_ID = env('SLACK_APP_ID')
 SLACK_CLIENT_ID = env('SLACK_CLIENT_ID')
 SLACK_CLIENT_SECRET = env('SLACK_CLIENT_SECRET')
