@@ -4,7 +4,7 @@ import re
 
 
 class Badge(models.Model):
-    badge = models.CharField(max_length=10, unique=True)
+    badge = models.CharField(max_length=100, unique=True)
 
     @staticmethod
     def is_valid_badge(badge_emoji):
