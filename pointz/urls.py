@@ -1,6 +1,7 @@
 from django.urls import path
-from .views import slash_pointz
+from .views import slash_pointz, slash_badgz
 
 urlpatterns = [
-    path('', slash_pointz)
+    path('pointz/', slash_pointz),
+    path('badgz/', slash_badgz),
 ]
