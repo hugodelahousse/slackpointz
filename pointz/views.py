@@ -12,6 +12,7 @@ slash_badgz_pattern = re.compile(r'(?P<user><@(?P<user_id>U[A-Z0-9]+)(\|(?P<user
 
 def profile_response(user, username):
     return JsonResponse({
+        'response_type': "in_channel",
         "text": f"{username or 'this user'}'s status:",
         "attachments": [
             {
