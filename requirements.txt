@@ -3,4 +3,3 @@ django-environ
 slackclient
 gunicorn
 django-heroku
-grapheme

@@ -1,9 +1,14 @@
 from django.db import models
 from django.db.models import F
+import re
 
 
 class Badge(models.Model):
     badge = models.CharField(max_length=10, unique=True)
+
+    @staticmethod
+    def is_valid_badge(badge_emoji):
+        return re.match(r':\S+:', badge_emoji)
 
 
 class SlackUser(models.Model):

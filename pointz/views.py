@@ -1,6 +1,5 @@
 import logging
 import re
-import grapheme
 from django.http import HttpResponse, JsonResponse
 from django.views.decorators.http import require_POST
 from .models import SlackUser, Badge
@@ -76,8 +75,8 @@ def slash_badgz(request):
     username = result.group('username')
     badge_emoji = result.group('badge')
 
-    if grapheme.length(badge_emoji) != 1 or (len(badge_emoji) == 1 and ord(badge_emoji) < 128):
-        return HttpResponse(f'Invalid badge: {badge_emoji}.\nIf you think this is a mistake,'
+    if not Badge.is_valid_badge(badge_emoji):
+        return HttpResponse(f'Invalid badge: {badge_emoji}.\nIf you think this is a mistake, '
                             f'feel free to post an issue here: http://github.com/hugodelahousse/slackpointz/issues')
     # Check valid badge
 
