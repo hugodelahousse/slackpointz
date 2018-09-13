@@ -14,3 +14,11 @@ class SlackUser(models.Model):
     def increase_score(self, score_delta):
         SlackUser.objects.filter(user_id=self.user_id).update(score=F('score') + score_delta)
         self.refresh_from_db(fields=['score'])
+
+    @property
+    def badges_text(self):
+        return ''.join([badge.badge for badge in self.badges.all()])
+
+    @property
+    def rank(self):
+        return SlackUser.objects.filter(score__gt=self.score).count() + 1

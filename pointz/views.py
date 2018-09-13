@@ -11,6 +11,24 @@ slash_pointz_pattern = re.compile(r'(?P<user><@(?P<user_id>U[A-Z0-9]+)(\|(?P<use
 slash_badgz_pattern = re.compile(r'(?P<user><@(?P<user_id>U[A-Z0-9]+)(\|(?P<username>\S+))?>)( (?P<badge>\S+))')
 
 
+def profile_response(user, username):
+    return JsonResponse({
+        "text": f"{username or 'this user'}'s status:",
+        "attachments": [
+            {
+                "title": "Points:",
+                "text": f"{user.score} points",
+                "color": "#6a89cc",
+                "footer": f"Ranked #{user.rank}"
+            },
+            {
+                "title": "Badges:",
+                "text": user.badges_text,
+                "color": "#f8c291"
+            }
+        ]
+    })
+
 def slack_response(text, response_type="in_channel"):
     return JsonResponse({
         'response_type': response_type,
@@ -41,9 +59,8 @@ def slash_pointz(request):
         if user.user_id == request.POST.get('user_id'):
             return HttpResponse('You can\'t give yourself points, silly !')
         user.increase_score(score_delta)
-        return slack_response(f'@{username or "this user"}\'s score is now: {user.score}')
-    elif result.group('user_id'):
-        return slack_response(f'@{username or "this user"} has {user.score} points !')
+
+    return profile_response(user, username)
 
 
 @require_POST
@@ -71,5 +88,4 @@ def slash_badgz(request):
     badge, _ = Badge.objects.get_or_create(badge=badge_emoji)
 
     user.badges.add(badge)
-    return slack_response(f'@{username or "this user"} has these badges: '
-                          f'{"".join([badge.badge for badge in user.badges.all()])}')
+    return profile_response(user, username)
