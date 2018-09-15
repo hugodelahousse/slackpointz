@@ -2,9 +2,12 @@ import logging
 import re
 from django.http import HttpResponse, JsonResponse
 from django.views.decorators.http import require_POST
+from django.conf import settings
+from slackclient import SlackClient
 from .models import SlackUser, Badge
 
 logger = logging.getLogger('django')
+sc = SlackClient(settings.SLACK_TOKEN)
 
 slash_pointz_pattern = re.compile(r'(?P<user><@(?P<user_id>U[A-Z0-9]+)(\|(?P<username>\S+))?>)( (?P<score_delta>[+-]?\d+))?')
 slash_badgz_pattern = re.compile(r'(?P<user><@(?P<user_id>U[A-Z0-9]+)(\|(?P<username>\S+))?>)( (?P<badge>\S+))')
@@ -17,7 +20,7 @@ def profile_response(user, username):
         "attachments": [
             {
                 "title": "Points:",
-                "text": f"{user.score} points",
+                "text": f"{user.score} {settings.POINTZ_UNIT}",
                 "color": "#6a89cc",
                 "footer": f"Ranked #{user.rank}"
             },
@@ -28,6 +31,7 @@ def profile_response(user, username):
             }
         ]
     })
+
 
 def slack_response(text, response_type="in_channel"):
     return JsonResponse({
@@ -89,3 +93,30 @@ def slash_badgz(request):
 
     user.badges.add(badge)
     return profile_response(user, username)
+
+
+@require_POST
+def slash_rankingz(request):
+    logger.debug(request.POST)
+
+    fields = []
+    users = SlackUser.objects.all().order_by('-score')
+    if users.count() > 0:
+        padding = len(str(users[0].score))
+    else:
+        padding = 0
+
+    for rank, user in enumerate(users, start=1):
+        fields.append({
+            'title': f'#{rank} - {user.score: <{padding}}{settings.POINTZ_UNIT}',
+            'value': f'<@{user.user_id}>',
+        })
+
+    return JsonResponse({
+        'response_type': 'in_channel',
+        'text': 'Pointz Rankingz',
+        'attachments': [{
+            "color": "#6a89cc",
+            'fields': fields
+        }]
+    })
