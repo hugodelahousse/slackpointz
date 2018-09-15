@@ -108,8 +108,10 @@ def slash_rankingz(request):
 
     for rank, user in enumerate(users, start=1):
         fields.append({
-            'title': f'#{rank} - {user.score: <{padding}}{settings.POINTZ_UNIT}',
-            'value': f'<@{user.user_id}>',
+            'value': f'*#{rank}: <@{user.user_id}>*',
+        })
+        fields.append({
+            'value': f'{user.score: >{padding}} {settings.POINTZ_UNIT}'
         })
 
     return JsonResponse({
