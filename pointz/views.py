@@ -64,6 +64,8 @@ def slash_pointz(request):
             return HttpResponse('You can\'t give yourself points, silly !')
         user.increase_score(score_delta)
 
+        post_receipt(request.POST.get('user_id'), user_id, score_delta)
+
     return profile_response(user, username)
 
 
@@ -122,3 +124,21 @@ def slash_rankingz(request):
             'fields': fields
         }]
     })
+
+
+def post_receipt(giver_id, receiver_id, count):
+    count = int(count)
+    if settings.RECEIPT_CHANNEL and count:
+
+        if count < 0:
+            text = f'<@{giver_id}> took away {abs(count)} {settings.POINTZ_UNIT} from <@{receiver_id}>'
+        else:
+            text = f'<@{giver_id}> gave {abs(count)} {settings.POINTZ_UNIT} to <@{receiver_id}>'
+
+        call = sc.api_call(
+            'chat.postMessage',
+            channel=settings.RECEIPT_CHANNEL,
+            text=text
+        )
+
+        logger.info(call)

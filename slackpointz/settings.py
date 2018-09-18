@@ -146,6 +146,7 @@ SLACK_CLIENT_ID = env('SLACK_CLIENT_ID')
 SLACK_CLIENT_SECRET = env('SLACK_CLIENT_SECRET')
 SLACK_TOKEN = env('SLACK_TOKEN')
 POINTZ_UNIT = env('POINTZ_UNIT', default='pointz')
+RECEIPT_CHANNEL = env('RECEIPT_CHANNEL', default=None)
 
 
 django_heroku.settings(locals())
