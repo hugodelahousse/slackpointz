@@ -22,6 +22,7 @@ import logging
 
 from pointz.views import slash_rankingz
 from quotz.views import search_book_response
+from quotz.models import SlackUser as QuotzSlackUser, QuotzSubscription
 
 logger = logging.getLogger('django')
 
@@ -38,9 +39,18 @@ def actionz(request):
             return slash_rankingz(request, offset=offset, ephemeral=False)
         return slash_rankingz(request, offset=offset)
     elif payload.get('callback_id') == 'quotz_subscribe':
-        search_string, index = action.get('value').split('|')
-        index = int(index)
-        return search_book_response(search_string, index)
+        if action.get('name') == 'next':
+            search_string, index = action.get('value').split('|')
+            index = int(index)
+            return search_book_response(search_string, index)
+        elif action.get('name') == 'subscribe':
+            user_id = payload.get('user').get('id')
+            user, created = QuotzSlackUser.objects.get_or_create(user_id=user_id)
+            book_id = action.get('value')
+            subscription, created = QuotzSubscription.objects.get_or_create(user=user, book_id=book_id)
+
+            return HttpResponse('Subscription successful !')
+
     else:
         return HttpResponse(status=400)
 

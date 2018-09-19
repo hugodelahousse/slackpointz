@@ -7,4 +7,4 @@ slackclient
 beautifulsoup4
 requests
 lxml
-
+ipython
