@@ -43,6 +43,7 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'pointz',
+    'bookz',
 ]
 
 MIDDLEWARE = [
@@ -147,6 +148,7 @@ SLACK_CLIENT_SECRET = env('SLACK_CLIENT_SECRET')
 SLACK_TOKEN = env('SLACK_TOKEN')
 POINTZ_UNIT = env('POINTZ_UNIT', default='pointz')
 RECEIPT_CHANNEL = env('RECEIPT_CHANNEL', default=None)
+GOODREADS_KEY = env('GOODREADS_KEY')
 
 
 django_heroku.settings(locals())

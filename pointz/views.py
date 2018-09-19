@@ -1,6 +1,5 @@
 import logging
 import re
-import json
 from django.http import HttpResponse, JsonResponse
 from django.views.decorators.http import require_POST
 from django.conf import settings
@@ -153,22 +152,6 @@ def slash_rankingz(request, offset=0, limit=5, ephemeral=True):
             'actions': actions
         }],
     })
-
-
-@require_POST
-def actionz(request):
-    logger.info(request.POST)
-    payload = json.loads(request.POST.get('payload'))
-    logger.info(payload)
-
-    if payload.get('callback_id') == "rankingz":
-        action = payload.get('actions')[0]
-        offset = int(action.get('value'))
-        if action.get('name') == "post":
-            return slash_rankingz(request, offset=offset, ephemeral=False)
-        return slash_rankingz(request, offset=offset)
-    else:
-        return HttpResponse(status=400)
 
 
 def post_receipt(giver_id, receiver_id, count):

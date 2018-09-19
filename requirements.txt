@@ -4,3 +4,7 @@ slackclient
 gunicorn
 django-heroku
 slackclient
+beautifulsoup4
+requests
+lxml
+
