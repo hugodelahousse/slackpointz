@@ -1,5 +1,6 @@
 import logging
 import re
+import json
 from django.http import HttpResponse, JsonResponse
 from django.views.decorators.http import require_POST
 from django.conf import settings
@@ -71,7 +72,7 @@ def slash_pointz(request):
 
 @require_POST
 def slash_badgz(request):
-    logger.debug(request.POST)
+    logger.info(request.POST)
     command_text = request.POST.get('text')
     result = slash_badgz_pattern.match(command_text)
 
@@ -98,8 +99,8 @@ def slash_badgz(request):
 
 
 @require_POST
-def slash_rankingz(request):
-    logger.debug(request.POST)
+def slash_rankingz(request, offset=0, limit=5, ephemeral=True):
+    logger.info(request.POST)
 
     fields = []
     users = SlackUser.objects.all().order_by('-score')
@@ -108,7 +109,7 @@ def slash_rankingz(request):
     else:
         padding = 0
 
-    for rank, user in enumerate(users, start=1):
+    for rank, user in enumerate(users[offset:offset + limit], start=offset + 1):
         fields.append({
             'value': f'*#{rank}: <@{user.user_id}>*',
         })
@@ -116,14 +117,58 @@ def slash_rankingz(request):
             'value': f'{user.score: >{padding}} {settings.POINTZ_UNIT}'
         })
 
+    actions = []
+
+    if ephemeral:
+        if offset >= limit:
+            actions.append({
+                'name': 'previous',
+                'text': ':arrow_left:',
+                'type': 'button',
+                'value': str(offset - limit),
+            })
+        actions.append({
+            'name': 'post',
+            'text': ':arrow_double_down:',
+            'type': 'button',
+            'value': str(offset),
+        })
+        if offset + limit < users.count():
+            actions.append({
+                'name': 'next',
+                'text': ':arrow_right:',
+                'type': 'button',
+                'value': str(offset + limit),
+            })
+
     return JsonResponse({
-        'response_type': 'in_channel',
+        'response_type': 'ephemeral' if ephemeral else 'in_channel',
+        'replace_original': ephemeral,
         'text': 'Pointz Rankingz',
+        'fallback': 'The user rankings !',
         'attachments': [{
+            'callback_id': 'rankingz',
             "color": "#6a89cc",
-            'fields': fields
-        }]
+            'fields': fields,
+            'actions': actions
+        }],
     })
+
+
+@require_POST
+def actionz(request):
+    logger.info(request.POST)
+    payload = json.loads(request.POST.get('payload'))
+    logger.info(payload)
+
+    if payload.get('callback_id') == "rankingz":
+        action = payload.get('actions')[0]
+        offset = int(action.get('value'))
+        if action.get('name') == "post":
+            return slash_rankingz(request, offset=offset, ephemeral=False)
+        return slash_rankingz(request, offset=offset)
+    else:
+        return HttpResponse(status=400)
 
 
 def post_receipt(giver_id, receiver_id, count):
