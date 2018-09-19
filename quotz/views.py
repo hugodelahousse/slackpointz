@@ -12,6 +12,9 @@ GOODREADS_SEARCH_URL = 'https://www.goodreads.com/search/index.xml'
 
 
 def search_book_response(search_text, results_index=0):
+    if not search_text:
+        return HttpResponse('Usage: /quotz_subscribe <Book name>')
+
     r = requests.get(GOODREADS_SEARCH_URL, params={
         'key': settings.GOODREADS_KEY,
         'q': search_text,
@@ -20,7 +23,7 @@ def search_book_response(search_text, results_index=0):
 
     results = soup.search.results.find_all('work')
     if not results or results_index >= len(results):
-        return 'No book found...'
+        return HttpResponse('No book found...')
 
     book = results[results_index]
 
@@ -46,7 +49,7 @@ def search_book_response(search_text, results_index=0):
                 'image_url': book.image_url.text,
                 'thumb_url': book.small_image_url.text,
                 'fallback': 'Find a book to subscribe to',
-                'callback_id': 'bookz_subscribe',
+                'callback_id': 'quotz_subscribe',
                 'actions': actions
             },
         ]
@@ -56,6 +59,6 @@ def search_book_response(search_text, results_index=0):
 
 
 @require_POST
-def slash_bookzsubscribe(request):
+def slack_quotzsubscribe(request):
     return search_book_response(request.POST.get('text'))
 

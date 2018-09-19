@@ -21,7 +21,7 @@ from django.views.decorators.http import require_POST
 import logging
 
 from pointz.views import slash_rankingz
-from bookz.views import search_book_response
+from quotz.views import search_book_response
 
 logger = logging.getLogger('django')
 
@@ -37,7 +37,7 @@ def actionz(request):
         if action.get('name') == "post":
             return slash_rankingz(request, offset=offset, ephemeral=False)
         return slash_rankingz(request, offset=offset)
-    elif payload.get('callback_id') == 'bookz_subscribe':
+    elif payload.get('callback_id') == 'quotz_subscribe':
         search_string, index = action.get('value').split('|')
         index = int(index)
         return search_book_response(search_string, index)
@@ -50,5 +50,5 @@ urlpatterns = [
     path('admin/', admin.site.urls),
     path('actionz/', actionz),
     path('', include('pointz.urls')),
-    path('', include('bookz.urls')),
+    path('', include('quotz.urls')),
 ]
